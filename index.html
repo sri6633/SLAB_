@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SlabAI — RC Slab Design Engine</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#060a10;color:#dde6f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 10% 5%,rgba(59,130,246,.08)0,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 90% 85%,rgba(167,139,250,.07)0,transparent 55%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(59,130,246,.022)1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.022)1px,transparent 1px);
+  background-size:48px 48px}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding:0 22px}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0 0}
+.logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+.logo-box{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 14px rgba(59,130,246,.3)}
+.logo span{color:#06b6d4}
+.ver{font-size:10px;color:#5a7194;background:rgba(99,179,255,.07);border:1px solid rgba(99,179,255,.12);padding:3px 11px;border-radius:20px;font-family:monospace}
+
+/* HERO */
+.hero{text-align:center;padding:46px 0 28px}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#06b6d4;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.18);padding:5px 15px;border-radius:20px;margin-bottom:18px;font-family:monospace}
+.hero-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:#06b6d4;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+h1{font-size:clamp(30px,4.8vw,60px);font-weight:800;line-height:1.05;letter-spacing:-.022em;margin-bottom:13px}
+.grad{background:linear-gradient(90deg,#3b82f6,#06b6d4 48%,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:14px;color:#5a7194;max-width:500px;margin:0 auto 30px;line-height:1.7}
+
+/* COUNTRY SELECTOR */
+.cs-wrap{max-width:640px;margin:0 auto 24px;background:#0d1422;border:1px solid rgba(99,179,255,.18);border-radius:16px;padding:18px 22px}
+.cs-lbl{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#5a7194;margin-bottom:13px;font-family:monospace;display:flex;align-items:center;gap:7px}
+.cs-lbl::after{content:'';flex:1;height:1px;background:rgba(99,179,255,.1)}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cs-btn{position:relative;padding:15px 10px;border-radius:11px;border:1.5px solid rgba(99,179,255,.1);background:#121b2e;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px;color:#dde6f0}
+.cs-btn:hover{border-color:rgba(99,179,255,.3);background:rgba(99,179,255,.05)}
+.cs-flag{font-size:26px;line-height:1}
+.cs-country{font-weight:700;font-size:13px}
+.cs-code{font-family:monospace;font-size:10px;color:#5a7194;transition:color .2s}
+.cs-tick{position:absolute;top:8px;right:8px;width:17px;height:17px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+
+/* CODE INFO BAR */
+.code-bar{max-width:640px;margin:0 auto 22px;border-radius:11px;border-left:3px solid #3b82f6;background:#0d1422;padding:11px 17px;display:flex;align-items:center;gap:13px;transition:border-color .3s}
+.cb-flag{font-size:22px}
+.cb-title{font-weight:700;font-size:13px;transition:color .3s}
+.cb-sub{font-size:11px;color:#5a7194;margin-top:2px}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:345px 1fr;gap:20px;align-items:start;padding-bottom:60px}
+
+/* INPUT CARD */
+.inp-card{border-radius:15px;overflow:hidden;position:sticky;top:18px;background:#0d1422;border:1px solid rgba(99,179,255,.18);border-top:2px solid #3b82f6;transition:border-color .3s}
+.inp-head{padding:15px 20px 12px;border-bottom:1px solid rgba(99,179,255,.09);display:flex;align-items:center;gap:10px}
+.inp-head-ico{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(6,182,212,.15));display:flex;align-items:center;justify-content:center;font-size:14px}
+.inp-title{font-weight:700;font-size:13px}
+.inp-sub{font-size:10px;color:#5a7194;margin-top:1px}
+.inp-body{padding:16px 20px}
+.sec-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#5a7194;margin-bottom:9px;font-family:monospace;display:flex;align-items:center;gap:6px}
+.sec-lbl::after{content:'';flex:1;height:1px;background:rgba(99,179,255,.09)}
+.sec{margin-bottom:17px}
+.row{margin-bottom:8px}
+.row label{display:block;font-size:11px;color:#7a9abf;margin-bottom:3px}
+.field{display:flex;align-items:center;background:#121b2e;border:1px solid rgba(99,179,255,.1);border-radius:8px;overflow:hidden;transition:border-color .18s,box-shadow .18s}
+.field:focus-within{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.field input,.field select{flex:1;background:transparent;border:none;outline:none;color:#dde6f0;font-family:monospace;font-size:12px;padding:7px 10px;width:100%}
+.field select option{background:#1a2540}
+.unit{padding:0 9px;font-size:9px;color:#5a7194;border-left:1px solid rgba(99,179,255,.09);white-space:nowrap;font-family:monospace}
+.run-btn{width:100%;padding:12px;border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;transition:transform .15s,box-shadow .15s;background:linear-gradient(135deg,#10b981,#06b6d4)}
+.run-btn:hover{transform:translateY(-1px);box-shadow:0 7px 22px rgba(59,130,246,.3)}
+.run-btn:active{transform:none}
+.run-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+
+/* RESULTS */
+.results{display:flex;flex-direction:column;gap:16px}
+.placeholder{background:#0d1422;border:1px dashed rgba(99,179,255,.1);border-radius:15px;padding:60px 32px;text-align:center}
+.ph-ico{font-size:44px;margin-bottom:13px;opacity:.3}
+.ph-h{font-weight:700;font-size:17px;color:#5a7194;margin-bottom:6px}
+.ph-p{font-size:12px;color:#5a7194;opacity:.65;line-height:1.65}
+
+/* RESULT CARD */
+.rcard{background:#0d1422;border-radius:15px;overflow:hidden;border:1px solid rgba(99,179,255,.12);animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.rcard-head{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(99,179,255,.09)}
+.r-left{display:flex;align-items:center;gap:10px}
+.r-badge{padding:5px 12px;border-radius:7px;font-family:monospace;font-size:10.5px;font-weight:700}
+.r-title{font-weight:700;font-size:15px}
+.r-sub{font-size:11px;color:#5a7194;margin-top:1px}
+.chip{padding:5px 12px;border-radius:20px;font-family:monospace;font-size:10px;font-weight:600}
+.chip-pass{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.22)}
+.chip-fail{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.22)}
+
+/* METRICS */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(99,179,255,.09)}
+.km{padding:13px 15px;border-right:1px solid rgba(99,179,255,.09);transition:background .15s}
+.km:last-child{border-right:none}
+.km:hover{background:#121b2e}
+.km-lbl{font-size:10px;color:#5a7194;margin-bottom:4px}
+.km-val{font-family:monospace;font-size:19px;font-weight:500;line-height:1.2}
+.km-unit{font-size:9px;color:#5a7194;margin-top:2px}
+
+/* TABLE */
+.dtable{padding:15px 20px}
+.dt-title{font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#5a7194;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dt-bar{width:3px;height:12px;border-radius:2px}
+table{width:100%;border-collapse:collapse}
+th{font-family:monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#5a7194;padding:0 0 7px;text-align:left;border-bottom:1px solid rgba(99,179,255,.07)}
+td{padding:7.5px 0;font-size:12px;border-bottom:1px solid rgba(99,179,255,.04);color:#dde6f0}
+.td-val{font-family:monospace;font-size:11px;text-align:right;color:#06b6d4}
+.c-pass{color:#10b981!important}
+.c-fail{color:#ef4444!important}
+tr:last-child td{border:none}
+
+/* SUGGESTIONS */
+.sug{padding:13px 20px 15px;border-top:1px solid rgba(99,179,255,.07);background:rgba(245,158,11,.03)}
+.sug-title{display:flex;align-items:center;gap:7px;font-weight:700;font-size:11.5px;color:#f59e0b;margin-bottom:9px}
+.sug-item{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:#c0a870;line-height:1.6;margin-bottom:4px}
+.sug-arr{color:#f59e0b;font-family:monospace;font-size:10px;flex-shrink:0;margin-top:2px}
+
+/* AI BOX */
+.ai-box{background:linear-gradient(135deg,rgba(59,130,246,.05),rgba(167,139,250,.05));border:1px solid rgba(167,139,250,.15);border-radius:12px;padding:15px 20px;animation:fadeUp .4s .25s ease both}
+.ai-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#a78bfa);animation:blink 2s infinite}
+.ai-lbl{font-weight:700;font-size:12px;background:linear-gradient(90deg,#3b82f6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ai-text{font-size:12px;line-height:1.75;color:#8aaabf}
+.ai-text b{color:#dde6f0}
+
+.err-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15);border-radius:10px;padding:13px 16px;color:#fca5a5;font-size:12px;line-height:1.6;margin:14px 20px}
+
+footer{text-align:center;padding:24px;color:#3a5060;font-size:11px;border-top:1px solid rgba(99,179,255,.07)}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .inp-card{position:static}
+  .kgrid{grid-template-columns:repeat(2,1fr)}
+  .cs-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:500px){
+  .cs-grid{grid-template-columns:1fr}
+  .kgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><div class="logo-box">🏗</div>Slab<span>AI</span></div>
+  <div class="ver">v2.0 · Zero Iteration</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-pill">AI Structural Engine · Direct Final Results</div>
+  <h1>RC Slab Design<br><span class="grad">Select Your Country's Code</span></h1>
+  <p class="hero-sub">Pick your country → inputs update for that code → click Run → instant final design with pass/fail + smart fix suggestions.</p>
+</div>
+
+<!-- COUNTRY SELECTOR -->
+<div class="cs-wrap">
+  <div class="cs-lbl">🌍 Select Design Standard</div>
+  <div class="cs-grid">
+    <button class="cs-btn" id="btn-IS" onclick="selectCode('IS')">
+      <span class="cs-tick" id="tick-IS">✓</span>
+      <span class="cs-flag">🇮🇳</span>
+      <span class="cs-country">India</span>
+      <span class="cs-code" id="cscode-IS">IS 456:2000</span>
+    </button>
+    <button class="cs-btn" id="btn-ACI" onclick="selectCode('ACI')">
+      <span class="cs-tick" id="tick-ACI">✓</span>
+      <span class="cs-flag">🇺🇸</span>
+      <span class="cs-country">United States</span>
+      <span class="cs-code" id="cscode-ACI">ACI 318-19</span>
+    </button>
+    <button class="cs-btn" id="btn-EC2" onclick="selectCode('EC2')">
+      <span class="cs-tick" id="tick-EC2">✓</span>
+      <span class="cs-flag">🇪🇺</span>
+      <span class="cs-country">Europe</span>
+      <span class="cs-code" id="cscode-EC2">EN 1992-1-1</span>
+    </button>
+  </div>
+</div>
+
+<!-- CODE BAR -->
+<div class="code-bar" id="codeBar">
+  <span class="cb-flag" id="cbFlag">🇮🇳</span>
+  <div>
+    <div class="cb-title" id="cbTitle">IS 456:2000 — Indian Standard</div>
+    <div class="cb-sub" id="cbSub">Limit State Method · Table 26 α-coefficients · L/d deflection · 1.5(DL+LL)</div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- INPUT PANEL -->
+  <div class="inp-card" id="inpCard">
+    <div class="inp-head">
+      <div class="inp-head-ico">⚡</div>
+      <div>
+        <div class="inp-title" id="inpTitle">IS 456:2000 Inputs</div>
+        <div class="inp-sub">Fill values → click Run → done</div>
+      </div>
+    </div>
+    <div class="inp-body">
+
+      <div class="sec">
+        <div class="sec-lbl">📐 Geometry</div>
+        <div class="row"><label>Shorter Span (Lx)</label>
+          <div class="field"><input type="number" id="lx" value="4.5" step="0.1" min="1" max="15"><span class="unit">m</span></div></div>
+        <div class="row"><label>Longer Span (Ly)</label>
+          <div class="field"><input type="number" id="ly" value="6.0" step="0.1" min="1" max="20"><span class="unit">m</span></div></div>
+        <div class="row"><label>Bar Diameter (φ)</label>
+          <div class="field"><input type="number" id="phi" value="12" step="2" min="8" max="25"><span class="unit">mm</span></div></div>
+        <div class="row"><label>Clear Cover</label>
+          <div class="field"><input type="number" id="cover" value="20" step="5" min="15" max="75"><span class="unit">mm</span></div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-lbl">🧱 Materials</div>
+        <div class="row"><label id="fckLbl">Concrete Grade (fck)</label>
+          <div class="field"><select id="fck"></select></div></div>
+        <div class="row"><label id="fyLbl">Steel Grade (fy)</label>
+          <div class="field"><select id="fy"></select></div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-lbl">⬇️ Loading</div>
+        <div class="row"><label id="dlLbl">Dead Load (DL)</label>
+          <div class="field"><input type="number" id="dl" value="2.0" step="0.5" min="0"><span class="unit">kN/m²</span></div></div>
+        <div class="row"><label id="llLbl">Live Load (LL)</label>
+          <div class="field"><input type="number" id="ll" value="3.0" step="0.5" min="0"><span class="unit">kN/m²</span></div></div>
+        <div class="row"><label>Floor Finish / SDL</label>
+          <div class="field"><input type="number" id="ff" value="1.0" step="0.5" min="0"><span class="unit">kN/m²</span></div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-lbl">🔩 Boundary Conditions</div>
+        <div class="row" id="edgeRow">
+          <label>Edge Condition (IS 456 Table 26)</label>
+          <div class="field"><select id="edge">
+            <option value="interior">Interior — All Edges Continuous</option>
+            <option value="one_short">One Short Edge Discontinuous</option>
+            <option value="one_long">One Long Edge Discontinuous</option>
+            <option value="two_adj" selected>Two Adjacent Edges Discontinuous</option>
+            <option value="two_short">Two Short Edges Discontinuous</option>
+            <option value="two_long">Two Long Edges Discontinuous</option>
+            <option value="three">Three Edges Discontinuous</option>
+            <option value="four">Four Edges Discontinuous (SS)</option>
+          </select></div>
+        </div>
+        <div class="row"><label>Support Condition</label>
+          <div class="field"><select id="supp">
+            <option value="ss" selected>Simply Supported</option>
+            <option value="cont">Continuous (Both Ends)</option>
+            <option value="cant">Cantilever</option>
+          </select></div>
+        </div>
+      </div>
+
+      <button class="run-btn" id="runBtn" onclick="runDesign()">
+        <span id="btnTxt">⚡ Run IS 456 Design</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="placeholder" id="ph">
+      <div class="ph-ico">🇮🇳</div>
+      <div class="ph-h">IS 456:2000 Selected</div>
+      <p class="ph-p">Fill inputs and click<br><b style="color:#486080">Run IS 456 Design</b><br>Zero iteration · Direct final output</p>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+</div><!-- /wrap -->
+
+<footer>SlabAI &nbsp;·&nbsp; IS 456:2000 &nbsp;|&nbsp; ACI 318-19 &nbsp;|&nbsp; EN 1992-1-1:2004 &nbsp;·&nbsp; For professional reference — always verify with a licensed structural engineer</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CODE CONFIG
+// ═══════════════════════════════════════════════════════
+var CODES = {
+  IS: {
+    color:"#10b981", border:"rgba(16,185,129,.35)", bg:"rgba(16,185,129,.1)",
+    flag:"🇮🇳", label:"India", code:"IS 456:2000",
+    cbTitle:"IS 456:2000 — Indian Standard Plain & Reinforced Concrete",
+    cbSub:"Limit State Method · Table 26 α-coefficients · L/d deflection · 1.5(DL+LL)",
+    inpTitle:"IS 456:2000 Inputs", btnTxt:"⚡ Run IS 456 Design",
+    fckLbl:"Concrete Grade (fck)", fyLbl:"Steel Grade (fy)",
+    dlLbl:"Dead Load (DL)", llLbl:"Live Load (LL)",
+    fckOpts:[["20","M20 — 20 MPa"],["25","M25 — 25 MPa"],["30","M30 — 30 MPa"],["35","M35 — 35 MPa"],["40","M40 — 40 MPa"]],
+    fyOpts:[["250","Fe250 — 250 MPa"],["415","Fe415 — 415 MPa"],["500","Fe500 — 500 MPa"],["550","Fe550 — 550 MPa"]],
+    fckDef:"25", fyDef:"415", showEdge:true
+  },
+  ACI: {
+    color:"#f97316", border:"rgba(249,115,22,.35)", bg:"rgba(249,115,22,.1)",
+    flag:"🇺🇸", label:"United States", code:"ACI 318-19",
+    cbTitle:"ACI 318-19 — Building Code Requirements for Structural Concrete",
+    cbSub:"Strength Design · 1.2D+1.6L factored loads · §9.3.1.1 h_min · ϕ = 0.90",
+    inpTitle:"ACI 318-19 Inputs", btnTxt:"⚡ Run ACI 318 Design",
+    fckLbl:"Concrete Strength (f'c)", fyLbl:"Steel Yield Strength (fy)",
+    dlLbl:"Dead Load (D)", llLbl:"Live Load (L)",
+    fckOpts:[["21","3000 psi / 21 MPa"],["28","4000 psi / 28 MPa"],["35","5000 psi / 35 MPa"],["42","6000 psi / 42 MPa"]],
+    fyOpts:[["280","Grade 40 — 280 MPa"],["420","Grade 60 — 420 MPa"],["520","Grade 75 — 520 MPa"]],
+    fckDef:"28", fyDef:"420", showEdge:false
+  },
+  EC2: {
+    color:"#a78bfa", border:"rgba(167,139,250,.35)", bg:"rgba(167,139,250,.1)",
+    flag:"🇪🇺", label:"Europe", code:"EN 1992-1-1:2004",
+    cbTitle:"EN 1992-1-1:2004 — Eurocode 2: Design of Concrete Structures",
+    cbSub:"Partial factor method · 1.35Gk+1.5Qk · §7.4.2 l/d · K-z lever arm steel",
+    inpTitle:"Eurocode 2 Inputs", btnTxt:"⚡ Run EC2 Design",
+    fckLbl:"Characteristic fck", fyLbl:"Characteristic fyk",
+    dlLbl:"Permanent Load (Gk)", llLbl:"Variable Load (Qk)",
+    fckOpts:[["20","C20/25"],["25","C25/30"],["30","C30/37"],["35","C35/45"],["40","C40/50"]],
+    fyOpts:[["400","B400 — 400 MPa"],["500","B500 — 500 MPa"],["600","B600 — 600 MPa"]],
+    fckDef:"25", fyDef:"500", showEdge:false
+  }
+};
+
+var currentCode = "IS";
+
+function selectCode(c) {
+  currentCode = c;
+  var m = CODES[c];
+
+  // Buttons
+  ["IS","ACI","EC2"].forEach(function(k){
+    var btn = document.getElementById("btn-"+k);
+    var tick = document.getElementById("tick-"+k);
+    var cs = document.getElementById("cscode-"+k);
+    var km = CODES[k];
+    if(k === c) {
+      btn.style.borderColor = km.color;
+      btn.style.background = km.bg;
+      tick.style.display = "flex";
+      tick.style.background = km.color;
+      cs.style.color = km.color;
+    } else {
+      btn.style.borderColor = "rgba(99,179,255,.1)";
+      btn.style.background = "#121b2e";
+      tick.style.display = "none";
+      cs.style.color = "#5a7194";
+    }
+  });
+
+  // Code bar
+  document.getElementById("codeBar").style.borderLeftColor = m.color;
+  document.getElementById("cbFlag").textContent = m.flag;
+  document.getElementById("cbTitle").textContent = m.cbTitle;
+  document.getElementById("cbTitle").style.color = m.color;
+  document.getElementById("cbSub").textContent = m.cbSub;
+
+  // Input card
+  document.getElementById("inpCard").style.borderTopColor = m.color;
+  document.getElementById("inpCard
